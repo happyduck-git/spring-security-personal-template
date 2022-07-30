@@ -1,13 +1,21 @@
 package com.example.securitydemo2.controller;
 
+import com.example.securitydemo2.model.Member;
+import com.example.securitydemo2.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class IndexController {
 
-    /* SecurityConfig에 아무런 configuration을 설정하지 않은 상태에서는 어떤 /***으로 들어가도 먼저 로그인을 해야하고, 로그인만 되면 다 접근이 허용된다. */
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/")
     public @ResponseBody
@@ -31,13 +39,31 @@ public class IndexController {
     }
 
     @GetMapping("/login")
-    public @ResponseBody String login() {
-        return "login";
+    public String login() {
+        return "loginForm";
     }
 
     @GetMapping("/join")
-    public @ResponseBody String join() {
-        return "join";
+    public String join() {
+        return "joinForm";
+    }
+
+    @PostMapping("/join")
+    public @ResponseBody String join(Member member) {
+        member.setRole("ROLE_USER"); //처음에는 USER라는 권한 부여
+        member.setPassword(passwordEncoder.encode(member.getPassword())); //password 인코딩 해서 저장 (안하면 로그인 시 에러 발생!)
+
+        memberRepository.save(member);
+        return "joined!";
+    }
+    @GetMapping("/info")
+    public @ResponseBody String info() {
+        return "info";
+    }
+
+    @GetMapping("/data")
+    public @ResponseBody String data() {
+        return "data";
     }
 
 }
