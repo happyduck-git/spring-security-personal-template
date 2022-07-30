@@ -3,6 +3,8 @@ package com.example.securitydemo2.controller;
 import com.example.securitydemo2.model.Member;
 import com.example.securitydemo2.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +30,13 @@ public class IndexController {
         return "user";
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/admin")
     public @ResponseBody String admin() {
         return "admin";
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     @GetMapping("/manager")
     public @ResponseBody String manager() {
         return "manager";
@@ -56,11 +60,14 @@ public class IndexController {
         memberRepository.save(member);
         return "joined!";
     }
+
+    @Secured("ROLE_ADMIN")
     @GetMapping("/info")
     public @ResponseBody String info() {
         return "info";
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     @GetMapping("/data")
     public @ResponseBody String data() {
         return "data";
