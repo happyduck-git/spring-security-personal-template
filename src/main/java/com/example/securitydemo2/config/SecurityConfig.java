@@ -15,17 +15,32 @@ public class SecurityConfig {
     //대신 원래 나오던 default 로그인 페이지가 더이상 안나옴..!
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        /* authorizeHttpRequests 사용해보았는데, authorizeRequests를 사용할 때와 완전히 동일한 기능을 넣으려면 어떻게 해야하는지 더 알아봐야 함*/
         http.csrf().disable();
         http.headers().frameOptions().disable();
 
-        http.authorizeRequests()
-                .antMatchers("/user/**").authenticated() //기본 인증된 사용자는 다 접근 가능!
-                .antMatchers("/manager/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')") //ROLE_ADMIN & ROLE_MANAGER인 경우 접근 가능한 경로
-                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")//ROLE_ADMIN인 경우 접근 가능한 경로
-                .anyRequest().permitAll()
-                .and() /* .and().formLogin().loginPage("/") 부분은 권한이 없는 페이지에 접속했을 때 login 페이지로 redirect하는 코드*/
-                .formLogin()
-                .loginPage("/login");
+        http.authorizeHttpRequests(authorize -> {
+            try {
+                authorize
+                        .antMatchers("/user/**").authenticated()
+                        .antMatchers("/admin/**").hasRole("ROLE_ADMIN")
+                        .antMatchers("/manager/**").hasRole("ROLE_ADMIN")
+                                .anyRequest().permitAll()
+                        .and()
+                        .formLogin().loginPage("/login");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+//        http.authorizeRequests()
+//                .antMatchers("/user/**").authenticated() //기본 인증된 사용자는 다 접근 가능!
+//                .antMatchers("/manager/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')") //ROLE_ADMIN & ROLE_MANAGER인 경우 접근 가능한 경로
+//                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")//ROLE_ADMIN인 경우 접근 가능한 경로
+//                .anyRequest().permitAll()
+//                .and() /* .and().formLogin().loginPage("/") 부분은 권한이 없는 페이지에 접속했을 때 login 페이지로 redirect하는 코드*/
+//                .formLogin()
+//                .loginPage("/login");
 
         return http.build();
     }
